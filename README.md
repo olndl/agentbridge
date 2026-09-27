@@ -1,19 +1,20 @@
 # AgentBridge
 
-AgentBridge is a production-style integration runtime for AI-agent workflows.
-It receives webhooks, normalizes payloads through configurable mappings, and
-delivers records to target systems through adapters.
+AgentBridge is a small integration platform for AI-assisted workflows. It
+receives webhooks from source systems, maps incoming JSON into a target schema,
+records every run, and delivers the normalized payload through target adapters.
 
-The project was built to demonstrate the core skills needed for integrations
-engineering: Python, TypeScript, APIs, idempotency, retries-ready architecture,
-structured payload handling, and a dashboard for inspecting workflow runs.
+The project focuses on the parts of integrations work that usually matter in
+practice: idempotency, changing webhook payloads, adapter boundaries, local
+observability, and a simple operator view for debugging what happened.
 
 ## Features
 
 - FastAPI backend with SQLite persistence
 - Webhook ingestion with idempotency keys
 - Adapter interface for target systems
-- Deterministic field mapping assistant
+- Deterministic field-mapping suggestions
+- Mock CRM target adapter for local development
 - React and TypeScript operations dashboard
 - Docker Compose setup
 - Backend tests and GitHub Actions CI
@@ -55,6 +56,8 @@ npm run dev
 
 The dashboard runs on `http://localhost:5173`.
 
+No external API keys are required for the default demo flow.
+
 ### Docker Compose
 
 ```bash
@@ -90,12 +93,23 @@ curl -X POST http://localhost:8000/webhooks/github \
 - `GET /runs/{run_id}`
 - `POST /mapping/suggest`
 
+## Code To Look At
+
+- `backend/app/main.py` wires the FastAPI routes.
+- `backend/app/store.py` handles SQLite persistence and idempotency.
+- `backend/app/mapper.py` contains the field mapping logic.
+- `backend/app/adapters/` shows the adapter boundary for target systems.
+- `frontend/src/main.tsx` contains the dashboard and webhook simulator.
+
 ## Why This Exists
 
-Enterprise agent platforms live or die by the quality of their integrations.
-AgentBridge focuses on the boring-but-critical parts: webhook ingestion,
-idempotency, payload mapping, adapter boundaries, observability, and an operator
-view for debugging what happened.
+Integrations are rarely just "send JSON from A to B". Real systems need a way
+to replay events safely, inspect failed runs, change mappings without rewriting
+the pipeline, and add new target systems without touching ingestion code.
+
+AgentBridge is a compact version of that idea: small enough to run locally, but
+structured like a service that could grow into real Slack, GitHub, CRM, or
+internal-tool integrations.
 
 ## Roadmap
 
